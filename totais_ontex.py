@@ -1,8 +1,3 @@
-from jnsql import simpleQuery
-from ftplib import FTP
-from datetime import datetime, timedelta
-import os
-
 def enviar_totais_ftp(dtini, dtfim, arquivo):
    
     host = ""
