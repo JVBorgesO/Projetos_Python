@@ -5,10 +5,10 @@ import os
 
 def enviar_totais_ftp(dtini, dtfim, arquivo):
    
-    host = "172.31.2.164"
-    port = 12021
-    username = "jnftp"
-    password = "senhaftp"
+    host = ""
+    port = 
+    username = ""
+    password = ""
     
     arquivo = f"totais_ontex_{dtini}_{dtfim}.txt"
     print(f"Nome do arquivo local: {arquivo}")
@@ -45,100 +45,15 @@ dtini = dtanterior
 dtfim = dtatual
 
 query_vendas = f"""
-WITH ITENS AS (
-    SELECT
-        c.NUNOTA,
-        c.SERIENOTA,
-        IIF(c.CODTIPOPER IN (102, 119, 128, 1000, 100), '01', '02') AS TIPFAT,
-        i.CODPROD,
-        i.QTDNEG,
-        i.VLRUNIT,
-        IIF(ctp.tipmov = 'B', 'S', 'N') AS BONIFICADO,
-        i.VLRTOT,
-        (i.VLRTOT - i.VLRDESC) AS VLRLIG,
-        ISNULL(i.VLRIPI, 0) AS VLRIPI,
-        ISNULL(c.VLRCOFINS, 0) AS VLRCOFINS,
-        0 AS VLRSUBST,
-        ISNULL(i.VLRICMS, 0) AS VLRICMS,
-        ISNULL(IIF(i.VLRDESC < 0, 0, i.VLRDESC), 0) AS VLRDESC
-    FROM
-        TGFCAB c
-        INNER JOIN TGFITE i ON i.NUNOTA = c.NUNOTA
-        INNER JOIN TGFPRO pro ON pro.CODPROD = i.CODPROD
-        INNER JOIN TGFPAR p ON p.CODPARC = c.CODPARC
-        INNER JOIN ad_cvtop_full ctp ON ctp.codtipoper = c.CODTIPOPER
-    WHERE
-        c.DTFATUR BETWEEN '{dtini}' AND '{dtfim}'
-        AND c.CODPARC NOT IN (16529)
-        AND pro.CODPARCFORN = 9143
-)
-SELECT
-    SUM(VLRTOT) AS TOTAL_VLRTOT
-FROM
-    ITENS;
+
 """
 
 query_estoque = f"""
-WITH SALDOS AS (
-    SELECT 
-        p.CODPROD,
-        ROUND(IIF(v.DIVIDEMULTIPLICA = 'M', (s.SALDO / v.QUANTIDADE), (s.SALDO * v.QUANTIDADE)), 2) AS SALDO_CALCULADO
-    FROM
-        TGFPRO p
-        INNER JOIN TGFVOA v ON v.CODPROD = p.CODPROD
-        OUTER APPLY (
-            SELECT
-                SUM(ITE.QTDNEG * ITE.ATUALESTOQUE) AS SALDO
-            FROM 
-                TGFITE ITE 
-                INNER JOIN TGFCAB CAB ON CAB.NUNOTA = ITE.NUNOTA
-            WHERE 
-                ITE.ATUALESTOQUE <> 0
-                AND CAB.DTNEG <= '{dtfim}'
-                AND RESERVA = 'N'
-                AND CODLOCALORIG = 1
-                AND ITE.CODPROD = p.CODPROD
-        ) s
-    WHERE
-        p.CODPARCFORN = 9143
-        AND p.ATIVO = 'S'
-        AND s.SALDO > 1
-        AND s.SALDO IS NOT NULL
-)
-SELECT 
-    SUM(SALDO_CALCULADO) AS TOTAL_SALDO_CALCULADO
-FROM 
-    SALDOS;
+
 """
 
 query_qtd_vendida = f"""
-WITH PRODUTOS AS (
-    SELECT
-        '2' CODIGO,
-        '23191831000193' NUMERO,
-        p.CODPROD,
-        RTRIM(MAX(v.CODBARRA)) AS COBARRA,
-        MAX(v.AD_ITENSPORVENDA) AS ITENSPORVENDA,
-        CAST(MAX(sankhya.AD_SNK_PRECO_JN(0, p.CODPROD, '{dtfim}')) AS DECIMAL(18, 2)) AS PRECO,
-        RTRIM(p.DESCRPROD) AS PRODUTO,
-        IIF(p.ATIVO = 'S', '01', '02') AS Linha
-    FROM
-        TGFPRO p
-        LEFT JOIN TGFVOA v ON v.CODPROD = p.CODPROD
-        INNER JOIN TGFITE i ON i.CODPROD = p.CODPROD
-        INNER JOIN TGFCAB c ON c.NUNOTA = i.NUNOTA
-    WHERE
-        p.CODPARCFORN = 9143
-        AND c.DTFATUR BETWEEN '{dtini}' AND '{dtfim}'
-    GROUP BY
-        p.CODPROD,
-        p.DESCRPROD,
-        p.ATIVO
-)
-SELECT
-    SUM(ITENSPORVENDA) AS QUANTIDADE_VENDIDA
-FROM
-    PRODUTOS;
+
 """
 
 try:
