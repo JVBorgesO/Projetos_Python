@@ -1,4 +1,4 @@
-from querys import info_prod_ecomerce
+#from querys import info_prod_ecomerce
 from datetime import datetime
 import pandas as pd
 
