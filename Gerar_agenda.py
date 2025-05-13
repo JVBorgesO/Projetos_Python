@@ -22,7 +22,8 @@ print(new_df)
 
 csv_file = 'AGD_ROTEIRO_' + dt_atual + '_V2.csv'
 
-# Gerar o CSV com ponto e vírgula como delimitador
-new_df.to_csv(csv_file, index=False, sep=';', encoding='utf-8-sig')
+with open(csv_file, 'w', encoding='utf-8-sig', newline='') as f:
+    f.write('C\n')
+    new_df.to_csv(f, index=False, sep=';')
 
 print(f'Arquivo "{csv_file}" criado com sucesso.')
